@@ -1,0 +1,12 @@
+[program:acme-queue]
+process_name=%(program_name)s_%(process_num)02d
+command=php artisan queue:work queue --memory={{ supervisor_workers_memory }} --timeout={{ supervisor_workers_timeout }} --sleep={{ supervisor_workers_sleep }} --delay={{ supervisor_workers_delay }} --tries={{ supervisor_workers_tries }} --env={{ app_environment }} --force
+directory={{ supervisor_workers_directory }}
+user={{ supervisor_workers_user }}
+numprocs={{ supervisor_workers_numprocs }}
+stdout_logfile={{ supervisor_workers_logfile_dir }}/queue.log
+stdout_logfile_maxbytes={{ supervisor_workers_logfile_maxbytes }}
+stdout_logfile_backups={{ supervisor_workers_logfile_backups }}
+redirect_stderr=true
+autostart={{ supervisor_workers_autostart }}
+autorestart={{ supervisor_workers_autorestart }}

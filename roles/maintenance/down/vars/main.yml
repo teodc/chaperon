@@ -1,0 +1,2 @@
+---
+app_root_dir: "{{ app.root_dir | default('/var/www/acme') }}"

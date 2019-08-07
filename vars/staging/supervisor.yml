@@ -1,0 +1,15 @@
+---
+supervisor:
+  workers_memory: 250
+  workers_timeout: 600
+  workers_sleep: 2
+  workers_delay: 0
+  workers_tries: 2
+  workers_directory: /var/www/acme
+  workers_user: ubuntu
+  workers_numprocs: 3
+  workers_logfile_dir: /var/log/supervisor/acme
+  workers_logfile_maxbytes: 50MB
+  workers_logfile_backups: 10
+  workers_autostart: "true"
+  workers_autorestart: "true"

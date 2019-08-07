@@ -1,0 +1,10 @@
+---
+common_packages:
+  - curl
+  - git
+  - htop
+  - python3-mysqldb
+  - sqlite3
+  - unzip
+  - wget
+  - awscli

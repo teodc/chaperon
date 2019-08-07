@@ -1,0 +1,5 @@
+---
+- name: Run the database migrations
+  shell: "php artisan migrate {{ '--force' if (app_environment == 'production') else '' }}"
+  args:
+    chdir: "{{ app_root_dir }}"

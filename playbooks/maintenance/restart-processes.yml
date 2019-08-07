@@ -1,0 +1,7 @@
+---
+- hosts: backend
+  become: false
+  vars_files:
+    - "../../vars/{{ env }}/app.yml"
+  roles:
+    - ../../roles/maintenance/restart-processes

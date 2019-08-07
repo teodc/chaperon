@@ -1,0 +1,48 @@
+---
+- name: Add PHP repository
+  apt_repository:
+    repo: "{{ php_repository }}"
+    state: present
+    update_cache: yes
+
+- name: Install PHP packages
+  apt:
+    name: "{{ php_packages }}"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Copy PHP configuration for FPM
+  template:
+    src: fpm.ini.j2
+    dest: /etc/php/{{ php_version }}/fpm/php.ini
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy PHP configuration for CLI
+  template:
+    src: cli.ini.j2
+    dest: /etc/php/{{ php_version }}/cli/php.ini
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy PHP-FPM pool configuration
+  template:
+    src: www.conf.j2
+    dest: /etc/php/{{ php_version }}/fpm/pool.d/www.conf
+    backup: yes
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart php-fpm
+
+- name: Ensure PHP-FPM is enabled & running
+  become: true
+  service:
+    name: php{{ php_version }}-fpm
+    enabled: yes
+    state: started

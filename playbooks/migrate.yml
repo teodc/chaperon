@@ -1,0 +1,7 @@
+---
+- hosts: controller-1
+  become: false
+  vars_files:
+    - "../vars/{{ env }}/app.yml"
+  roles:
+    - ../roles/migrate

@@ -1,0 +1,14 @@
+---
+- name: Install Supervisor package
+  apt:
+    name: supervisor
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Ensure Supervisor is enabled & running
+  become: true
+  service:
+    name: supervisor
+    enabled: yes
+    state: started

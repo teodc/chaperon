@@ -1,0 +1,270 @@
+#!/usr/bin/env bash
+
+VERSION="0.0.0"
+
+# Define output colors
+ESC_CODE="\033["
+COLOR_RESET=${ESC_CODE}"0m"
+COLOR_RED=${ESC_CODE}"0;31m"
+COLOR_GREEN=${ESC_CODE}"0;32m"
+COLOR_YELLOW=${ESC_CODE}"0;33m"
+COLOR_BLUE=${ESC_CODE}"0;34m"
+COLOR_MAGENTA=${ESC_CODE}"0;35m"
+COLOR_CYAN=${ESC_CODE}"0;36m"
+
+resolveOs() {
+  local UNAME_OUTPUT="$(uname -s)"
+  local MACHINE="unknown"
+
+  case "${UNAME_OUTPUT}" in
+  Linux*) local MACHINE=linux ;;
+  Darwin*) local MACHINE=mac ;;
+  esac
+
+  echo "${MACHINE}"
+}
+
+# Check the running system
+if [[ ! $(resolveOs) =~ ^(linux|mac)$ ]]; then
+  echo "Unsupported system."
+  echo "Your OS must be Linux or Mac."
+  printf "\n"
+  exit 0
+fi
+
+# Usage: $(resolvePath $(resolveOs) <path>)
+resolvePath() {
+  case ${1} in
+  linux) local PATH="$(readlink -f ${2})" ;;
+  mac) local PATH="$(greadlink -f ${2})" ;;
+  *) local PATH="${2}" ;;
+  esac
+
+  echo "${PATH}"
+}
+
+showVersion() {
+  INTRO="${COLOR_GREEN}Chaperone${COLOR_RESET}"
+  INTRO="${INTRO}\nVersion ${COLOR_BLUE}${VERSION}${COLOR_RESET}"
+  printf "${INTRO}"
+  printf "\n"
+}
+
+showUsage() {
+  USAGE="${COLOR_YELLOW}Usage:${COLOR_RESET} \n"
+  USAGE="${USAGE} bin/chaperone <cmd> [<env>] [<options>] \n"
+
+  printf "\n"
+  printf "${USAGE}"
+
+  COMMANDS="${COLOR_YELLOW}Commands:${COLOR_RESET} \n"
+  COMMANDS="${COMMANDS} version                   Show the version screen \n"
+  COMMANDS="${COMMANDS} help                      Show the help screen \n"
+  COMMANDS="${COMMANDS} provision <env>           Configure the nodes \n"
+  COMMANDS="${COMMANDS} deploy <env>              Deploy the app on the nodes \n"
+  COMMANDS="${COMMANDS} pull <env>                Pull the latest version of the app on the nodes \n"
+  COMMANDS="${COMMANDS} migrate <env>             Run the outstanding database migrations (run only on one node) \n"
+  COMMANDS="${COMMANDS} down <env>                Put the app into maintenance mode \n"
+  COMMANDS="${COMMANDS} up <env>                  Bring the app out of maintenance mode \n"
+  COMMANDS="${COMMANDS} clean-files <env>         Clean the app's temporary files & logs on each node \n"
+  COMMANDS="${COMMANDS} stop-processes <env>      Stop all the processes on the nodes \n"
+  COMMANDS="${COMMANDS} restart-processes <env>   Restart all the processes on the nodes \n"
+
+  printf "\n"
+  printf "$COMMANDS"
+
+  OPTIONS="${COLOR_YELLOW}Options:${COLOR_RESET} \n"
+  OPTIONS="${OPTIONS} --limit[=NODE]             Run the playbook on a single node or a group of nodes \n"
+  OPTIONS="${OPTIONS} --private-key[=PATH]       Specify the private SSH key to use to connect to the nodes (default: ~/.ssh/pem/<env>.pem) \n"
+  OPTIONS="${OPTIONS} --pretend                  Show the Ansible command that will be ran \n"
+
+  printf "\n"
+  printf "${OPTIONS}"
+}
+
+showHelp() {
+  $(showVersion)
+  $(showUsage)
+}
+
+# Set global variables
+DIRNAME="$(dirname $(resolvePath $(resolveOs) ${0}))"
+STAGING_ENV="staging"
+PRODUCTION_ENV="production"
+INVENTORY_PATH="${DIRNAME}/../hosts"
+INVENTORY_NAME=""
+PLAYBOOK_PATH="${DIRNAME}/../playbooks"
+PLAYBOOK_NAME=""
+PRIVATE_KEY_PATH="~/.ssh/pem"
+ASK_FOR_PASSWORD="no"
+LIMIT=""
+CUSTOM_PRIVATE_KEY=""
+PRETEND="no"
+
+# Parse options
+for opt in "$@"; do
+  case $opt in
+  --limit=*)
+    LIMIT="${opt#*=}"
+    ;;
+  --private-key=*)
+    CUSTOM_PRIVATE_KEY="${opt#*=}"
+    ;;
+  --pretend)
+    PRETEND="yes"
+    ;;
+  esac
+done
+
+if [[ $# -gt 0 ]]; then
+
+  # Show version screen
+  if [[ "${1}" == "version" ]]; then
+    $(showVersion)
+    printf "\n"
+    exit 0
+  fi
+
+  # Show help screen
+  if [[ "${1}" == "help" ]]; then
+    $(showHelp)
+    printf "\n"
+    exit 0
+  fi
+
+  # If the command is not "version" or "help", the second argument must be a valid environment
+  if [[ "${2}" != "${STAGING_ENV}" && "${2}" != "${PRODUCTION_ENV}" ]]; then
+    if [[ -z "${2}" ]]; then
+      ERROR="${COLOR_RED}Please select the environment to chaperone as the second argument${COLOR_RESET}"
+    else
+      ERROR="${COLOR_RED}Environment not valid${COLOR_RESET}"
+    fi
+    printf "${ERROR}"
+    printf "\n"
+    exit 0
+  fi
+
+  # Set staging variables
+  if [[ "${2}" == "${STAGING_ENV}" ]]; then
+    INVENTORY_NAME="staging.yml"
+    PRIVATE_KEY_NAME="staging.pem"
+  fi
+
+  # Set production variables
+  if [[ "${2}" == "${PRODUCTION_ENV}" ]]; then
+    INVENTORY_NAME="production.yml"
+    PRIVATE_KEY_NAME="production.pem"
+  fi
+
+  # Provision the nodes
+  if [[ "${1}" == "provision" ]]; then
+    PLAYBOOK_NAME="provision.yml"
+    ASK_FOR_PASSWORD="yes"
+  fi
+
+  # Deploy the app on the nodes
+  if [[ "${1}" == "deploy" ]]; then
+    PLAYBOOK_NAME="deploy.yml"
+    ASK_FOR_PASSWORD="yes"
+  fi
+
+  # Pulling the latest version of the app on the nodes
+  if [[ "${1}" == "pull" ]]; then
+    PLAYBOOK_NAME="pull.yml"
+    ASK_FOR_PASSWORD="yes"
+  fi
+
+  # Run the outstanding database migrations
+  if [[ "${1}" == "migrate" ]]; then
+    PLAYBOOK_NAME="migrate.yml"
+    ASK_FOR_PASSWORD="no"
+    LIMIT="controller-1"
+  fi
+
+  # Put the app into maintenance mode
+  if [[ "${1}" == "down" ]]; then
+    PLAYBOOK_NAME="maintenance/down.yml"
+    ASK_FOR_PASSWORD="no"
+  fi
+
+  # Bring the app out of maintenance mode
+  if [[ "${1}" == "up" ]]; then
+    PLAYBOOK_NAME="maintenance/up.yml"
+    ASK_FOR_PASSWORD="no"
+  fi
+
+  # Clean the app's temporary files & logs on the nodes
+  if [[ "${1}" == "clean-files" ]]; then
+    PLAYBOOK_NAME="maintenance/clean-files.yml"
+    ASK_FOR_PASSWORD="no"
+  fi
+
+  # Stop all the processes on the nodes
+  if [[ "${1}" == "stop-processes" ]]; then
+    PLAYBOOK_NAME="maintenance/stop-processes.yml"
+    ASK_FOR_PASSWORD="no"
+  fi
+
+  # Restart all the processes on the nodes
+  if [[ "${1}" == "restart-processes" ]]; then
+    PLAYBOOK_NAME="maintenance/restart-processes.yml"
+    ASK_FOR_PASSWORD="no"
+  fi
+
+  # If an inventory and a playbook have been set, we can run the ansible-playbook command
+  if [[ -n "${INVENTORY_NAME}" && -n "${PLAYBOOK_NAME}" ]]; then
+
+    # Prepare the ansible-playbook command
+    COMMAND="ansible-playbook -i ${INVENTORY_PATH}/${INVENTORY_NAME} ${PLAYBOOK_PATH}/${PLAYBOOK_NAME}"
+
+    # Add the private key to the ansible-playbook command
+    if [[ -n "${CUSTOM_PRIVATE_KEY}" ]]; then
+      COMMAND="${COMMAND} --private-key ${CUSTOM_PRIVATE_KEY}"
+    else
+      COMMAND="${COMMAND} --private-key ${PRIVATE_KEY_PATH}/${PRIVATE_KEY_NAME}"
+    fi
+
+    # Check if we should ask for the ansible-vault password
+    if [[ "${ASK_FOR_PASSWORD}" == "yes" ]]; then
+      COMMAND="${COMMAND} --vault-id @prompt"
+    fi
+
+    # Check if we should limit the playbook execution
+    if [[ -n "${LIMIT}" ]]; then
+      COMMAND="${COMMAND} --limit ${LIMIT}"
+    fi
+
+    # Add the options to the command for the merge action
+    if [[ -n "${MERGE_COMMAND_OPTIONS}" ]]; then
+      COMMAND="${COMMAND} ${MERGE_COMMAND_OPTIONS}"
+    fi
+
+    # Increase the number of forks
+    COMMAND="${COMMAND} --forks 50"
+
+    # Check the "pretend" option
+    if [[ "${PRETEND}" == "yes" ]]; then
+      echo "${COMMAND}"
+      printf "\n"
+      exit 0
+    fi
+
+    # Run the Ansible playbook command
+    eval "${COMMAND}"
+    printf "\n"
+    exit 0
+  fi
+
+  # Unrecognized command
+  printf "${COLOR_YELLOW}Nothing to do${COLOR_RESET}"
+  printf "\n"
+  exit 0
+
+else
+
+  # Show the help screen if nothing no arguments are passed
+  $(showHelp)
+  printf "\n"
+  exit 0
+
+fi

@@ -1,0 +1,6 @@
+---
+app:
+  environment: production
+  root_dir: /var/www/acme
+  public_dir: /var/www/acme/public
+  storage_dir: /var/www/acme/storage

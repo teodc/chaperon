@@ -1,0 +1,61 @@
+---
+php_repository: "{{ php.repository | default('ppa:ondrej/php') }}"
+php_version: "{{ php.version | default('7.3') }}"
+php_packages:
+  - php7.3
+  - php7.3-bcmath
+  - php7.3-cli
+  - php7.3-common
+  - php7.3-curl
+  - php7.3-fpm
+  - php7.3-gd
+  - php7.3-intl
+  - php7.3-json
+  - php7.3-mbstring
+  - php7.3-mysql
+  - php7.3-opcache
+  - php7.3-redis
+  - php7.3-sqlite3
+  - php7.3-yaml
+  - php7.3-xml
+  - php7.3-zip
+  - php-mongodb
+php_short_open_tag: "{{ php.short_open_tag | default('Off') }}"
+php_expose_php: "{{ php.expose_php | default('Off') }}"
+php_max_execution_time: "{{ php.max_execution_time | default(30) }}"
+php_max_input_time: "{{ php.max_input_time | default(60) }}"
+php_max_input_nesting_level: "{{ php.max_input_nesting_level | default(128) }}"
+php_max_input_vars: "{{ php.max_input_vars | default(1000) }}"
+php_memory_limit: "{{ php.memory_limit | default('512M') }}"
+php_error_reporting: "{{ php.error_reporting | default('E_ALL') }}"
+php_display_errors: "{{ php.display_errors | default('On') }}"
+php_display_startup_errors: "{{ php.display_startup_errors | default('On') }}"
+php_post_max_size: "{{ php.post_max_size | default('16M') }}"
+php_default_mimetype: "{{ php.default_mimetype | default('text/html') }}"
+php_default_charset: "{{ php.default_charset | default('UTF-8') }}"
+php_upload_max_filesize: "{{ php.upload_max_filesize | default('128M') }}"
+php_max_file_uploads: "{{ php.max_file_uploads | default(20) }}"
+php_date_timezone: "{{ php.date_timezone | default('UTC') }}"
+php_opcache_enable: "{{ php.opcache_enable | default(1) }}"
+php_opcache_enable_cli: "{{ php.opcache_enable_cli | default(1) }}"
+php_opcache_memory_consumption: "{{ php.opcache_memory_consumption | default(128) }}"
+php_opcache_interned_strings_buffer: "{{ php.opcache_interned_strings_buffer | default(16) }}"
+php_opcache_max_accelerated_files: "{{ php.opcache_max_accelerated_files | default(4000) }}"
+php_opcache_validate_timestamps: "{{ php.opcache_validate_timestamps | default(1) }}"
+php_opcache_revalidate_freq: "{{ php.opcache_revalidate_freq | default(0) }}"
+
+fpm_user: "{{ php.fpm_user | default('www-data') }}"
+fpm_group: "{{ php.fpm_group | default('www-data') }}"
+fpm_listen_owner: "{{ php.fpm_listen_owner | default('www-data') }}"
+fpm_listen_group: "{{ php.fpm_listen_group | default('www-data') }}"
+fpm_allowed_clients: "{{ php.fpm_allowed_clients | default('127.0.0.1') }}"
+fpm_pm_type: "{{ php.fpm_pm_type | default('dynamic') }}"
+fpm_pm_max_children: "{{ php.fpm_pm_max_children | default(10) }}"
+fpm_pm_start_servers: "{{ php.fpm_pm_start_servers | default(4) }}"
+fpm_pm_min_spare_servers: "{{ php.fpm_pm_min_spare_servers | default(2) }}"
+fpm_pm_max_spare_servers: "{{ php.fpm_pm_max_spare_servers | default(6) }}"
+fpm_pm_process_idle_timeout: "{{ php.fpm_pm_process_idle_timeout | default('10s') }}"
+fpm_pm_max_requests: "{{ php.fpm_pm_max_requests | default(500) }}"
+fpm_slowlog: "{{ php.fpm_slowlog | default('/var/log/php-fpm/$pool.slow.log') }}"
+fpm_request_slowlog_timeout: "{{ php.fpm_request_slowlog_timeout | default(0) }}"
+fpm_request_terminate_timeout: "{{ php.fpm_request_terminate_timeout | default(0) }}"

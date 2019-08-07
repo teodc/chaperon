@@ -1,0 +1,15 @@
+---
+nginx:
+  repository: ppa:nginx/stable
+  user: "{{ web_server_user }}"
+  worker_processes: auto
+  worker_connections: 4096
+  multi_accept: "on"
+  disable_default_vhost: true
+  vhost_root: /var/www/acme/public
+  vhost_server_name: "*.acme.com"
+  vhost_log_level: error
+  vhost_set_no_cache: 1
+  vhost_fastcgi_cache_valid_time: 10m
+  vhost_static_cache_control_header: "public, max-age=86400, s-maxage=86400"
+  vhost_static_expires: 30d

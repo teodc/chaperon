@@ -1,0 +1,4 @@
+---
+git:
+  repository_url: git@github.com:acme-user/acme-app.git
+  repository_branch: staging

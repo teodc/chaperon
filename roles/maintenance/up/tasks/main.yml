@@ -1,0 +1,5 @@
+---
+- name: Bring the app out of maintenance mode
+  shell: php artisan up
+  args:
+    chdir: "{{ app_root_dir }}"

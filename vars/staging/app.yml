@@ -1,0 +1,6 @@
+---
+app:
+  environment: staging
+  root_dir: /var/www/acme
+  public_dir: /var/www/acme/public
+  storage_dir: /var/www/acme/storage

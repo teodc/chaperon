@@ -1,0 +1,42 @@
+---
+php:
+  repository: ppa:ondrej/php
+  version: 7.3
+  short_open_tag: "Off"
+  expose_php: "Off"
+  max_execution_time: 60
+  max_input_time: 60
+  max_input_nesting_level: 128
+  max_input_vars: 1000
+  memory_limit: 768M
+  error_reporting: "E_ALL & ~E_NOTICE"
+  display_errors: "Off"
+  display_startup_errors: "Off"
+  post_max_size: 32M
+  default_mimetype: text/html
+  default_charset: UTF-8
+  upload_max_filesize: 128M
+  max_file_uploads: 20
+  date_timezone: UTC
+  opcache_enable: 1
+  opcache_enable_cli: 1
+  opcache_memory_consumption: 256
+  opcache_interned_strings_buffer: 16
+  opcache_max_accelerated_files: 7963
+  opcache_validate_timestamps: 1
+  opcache_revalidate_freq: 0
+  fpm_user: "{{ web_server_user }}"
+  fpm_group: "{{ web_server_user_group }}"
+  fpm_listen_owner: "{{ web_server_user }}"
+  fpm_listen_group: "{{ web_server_user_group }}"
+  fpm_allowed_clients: 127.0.0.1
+  fpm_pm_type: dynamic
+  fpm_pm_max_children: 100
+  fpm_pm_start_servers: 20
+  fpm_pm_min_spare_servers: 10
+  fpm_pm_max_spare_servers: 20
+  fpm_pm_process_idle_timeout: "10s"
+  fpm_pm_max_requests: 1000
+  fpm_slowlog: /var/log/php-fpm/$pool.slow.log
+  fpm_request_slowlog_timeout: 0
+  fpm_request_terminate_timeout: 0

@@ -1,0 +1,2 @@
+---
+composer_install_dir: "{{ composer.install_dir | default('/usr/local/bin') }}"

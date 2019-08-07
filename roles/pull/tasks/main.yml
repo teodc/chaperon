@@ -1,0 +1,107 @@
+---
+- name: Flush the application cache
+  shell: php artisan cache:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Flush the model cache
+  shell: php artisan modelCache:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Clear config cache
+  shell: php artisan config:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Clear routes cache
+  shell: php artisan route:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Clear events & listeners cache
+  shell: php artisan event:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Clear views cache
+  shell: php artisan view:clear
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Pull source code from repository
+  git:
+    repo: "{{ git_repository_url }}"
+    version: "{{ git_repository_branch }}"
+    dest: "{{ app_root_dir }}"
+    accept_hostkey: true
+    force: yes
+
+- name: Copy env file
+  become: true
+  copy:
+    src: "{{ files_dir }}/.env"
+    dest: "{{ app_root_dir }}/.env"
+    owner: "{{ server_user }}"
+    group: "{{ web_server_user_group }}"
+    mode: 0640
+
+- name: Remove the vendor directory
+  become: true
+  file:
+    path: "{{ app_root_dir }}/vendor"
+    state: absent
+
+- name: Install Composer packages
+  composer:
+    command: install
+    no_dev: "{{ composer_no_dev }}"
+    optimize_autoloader: "{{ composer_optimize_autoloader }}"
+    prefer_dist: "{{ composer_prefer_dist }}"
+    working_dir: "{{ app_root_dir }}"
+
+- name: Cache config
+  shell: php artisan config:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache routes
+  shell: php artisan route:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache events & listeners
+  shell: php artisan event:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache views
+  shell: php artisan view:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Reload PHP-FPM (API nodes only)
+  become: true
+  service:
+    name: "php{{ php_version }}-fpm"
+    state: reloaded
+  when: node_type == "api"
+
+- name: Reload Nginx (API nodes only)
+  become: true
+  service:
+    name: nginx
+    state: reloaded
+  when: node_type == "api"
+
+- name: Restart queue worker daemons (worker nodes only)
+  shell: php artisan queue:restart
+  args:
+    chdir: "{{ app_root_dir }}"
+  when: node_type == "worker"
+
+- name: Restart Cron (controller nodes only)
+  become: true
+  service:
+    name: cron
+    state: restarted

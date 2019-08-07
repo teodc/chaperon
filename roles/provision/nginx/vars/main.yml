@@ -1,0 +1,7 @@
+---
+nginx_repository: "{{ nginx.repository | default('ppa:nginx/stable') }}"
+nginx_user: "{{ nginx.user | default('www-data') }}"
+nginx_worker_processes: "{{ nginx.worker_processes | default('auto') }}"
+nginx_worker_connections: "{{ nginx.worker_connections | default(4096) }}"
+nginx_multi_accept: "{{ nginx.multi_accept | default('on') }}"
+nginx_disable_default_vhost: "{{ nginx.disable_default_vhost | default(true) }}"

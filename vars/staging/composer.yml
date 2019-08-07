@@ -1,0 +1,6 @@
+---
+composer:
+  install_dir: /usr/local/bin
+  no_dev: false
+  optimize_autoloader: true
+  prefer_dist: true

@@ -1,0 +1,12 @@
+---
+- name: Reboot the host
+  shell: "sleep {{ reboot_after }} && reboot"
+  async: 1
+  poll: 0
+
+- name: Wait for the reboot to complete
+  wait_for_connection:
+    connect_timeout: 30
+    sleep: 3
+    delay: 3
+    timeout: 300

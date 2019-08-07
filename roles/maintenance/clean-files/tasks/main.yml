@@ -1,0 +1,22 @@
+---
+- name: Clean the app's files
+  become: true
+  shell: "rm -rf {{ app_root_dir }}{{ item }}"
+  with_items:
+    - "/storage/app"
+    #- "/storage/app/tmp"
+    #- "/storage/tmp"
+
+- name: Clean the app's logs
+  become: true
+  shell: "rm -rf {{ app_root_dir }}{{ item }}"
+  with_items:
+    - "/storage/logs/*.log"
+
+- name: Clean some system logs
+  become: true
+  shell: "rm -rf /var/log{{ item }}"
+  with_items:
+    - "/*log.*.gz"
+    - "/nginx/*log.*.gz"
+    - "/supervisor/acme/queue-*"

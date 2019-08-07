@@ -1,0 +1,11 @@
+---
+- name: Restart the stack's processes
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  with_items:
+    - "php7.3-fpm"
+    - "nginx"
+    - "cron"
+    - "supervisor"

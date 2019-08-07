@@ -1,0 +1,8 @@
+---
+nginx_vhost_root: "{{ nginx.vhost_root | default('/var/www/acme/public') }}"
+nginx_vhost_server_name: "{{ nginx.vhost_server_name | default('*.acme.com') }}"
+nginx_vhost_log_level: "{{ nginx.vhost_log_level | default('debug') }}"
+nginx_vhost_set_no_cache: "{{ nginx.vhost_set_no_cache | default(1) }}"
+nginx_vhost_fastcgi_cache_valid_time: "{{ nginx.vhost_fastcgi_cache_valid_time | default('10m') }}"
+nginx_vhost_static_cache_control_header: "{{ nginx.vhost_static_cache_control_header | default('public') }}"
+nginx_vhost_static_expires: "{{ nginx.vhost_static_expires | default('off') }}"

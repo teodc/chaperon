@@ -1,0 +1,11 @@
+---
+- name: Stop the stack's processes
+  become: true
+  service:
+    name: "{{ item }}"
+    state: stopped
+  with_items:
+    - "php7.3-fpm"
+    - "nginx"
+    - "cron"
+    - "supervisor"

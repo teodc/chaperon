@@ -1,0 +1,14 @@
+---
+app_environment: "{{ app.environment | default('staging') }}"
+app_root_dir: "{{ app.root_dir | default('/var/www/acme') }}"
+app_public_dir: "{{ app.public_dir | default('/var/www/acme/public') }}"
+app_storage_dir: "{{ app.storage_dir | default('/var/www/acme/storage') }}"
+
+git_repository_url: "{{ git.repository_url | default('git@github.com:acme-user/acme-app.git') }}"
+git_repository_branch: "{{ git.repository_branch | default('staging') }}"
+
+php_version: "{{ php.version | default('7.3') }}"
+
+composer_no_dev: "{{ composer.no_dev | default(true) }}"
+composer_optimize_autoloader: "{{ composer.optimize_autoloader | default(true) }}"
+composer_prefer_dist: "{{ composer.prefer_dist | default(true) }}"

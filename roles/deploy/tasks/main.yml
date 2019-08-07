@@ -1,0 +1,96 @@
+---
+- name: Create the app root folder
+  become: true
+  file:
+    path: "{{ app_root_dir }}"
+    state: directory
+    owner: "{{ server_user }}"
+    group: "{{ web_server_user_group }}"
+    mode: 0755
+
+- name: Pull source code from repository
+  git:
+    repo: "{{ git_repository_url }}"
+    version: "{{ git_repository_branch }}"
+    dest: "{{ app_root_dir }}"
+    accept_hostkey: true
+    force: yes
+
+- name: Copy env file
+  become: true
+  copy:
+    src: "{{ files_dir }}/.env"
+    dest: "{{ app_root_dir }}/.env"
+    owner: "{{ server_user }}"
+    group: "{{ web_server_user_group }}"
+    mode: 0640
+
+- name: Install Composer packages
+  composer:
+    command: install
+    no_dev: "{{ composer_no_dev }}"
+    optimize_autoloader: "{{ composer_optimize_autoloader }}"
+    prefer_dist: "{{ composer_prefer_dist }}"
+    working_dir: "{{ app_root_dir }}"
+
+- name: Set storage folders permissions
+  become: true
+  file:
+    path: "{{ app_root_dir }}/storage"
+    owner: "{{ server_user }}"
+    group: "{{ web_server_user_group }}"
+    mode: 0775
+    recurse: yes
+
+- name: Set cache folder permissions
+  become: true
+  file:
+    path: "{{ app_root_dir }}/bootstrap/cache"
+    owner: "{{ server_user }}"
+    group: "{{ web_server_user_group }}"
+    mode: 0775
+    recurse: yes
+
+- name: Cache config
+  shell: php artisan config:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache routes
+  shell: php artisan route:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache events & listeners
+  shell: php artisan event:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Cache views
+  shell: php artisan view:cache
+  args:
+    chdir: "{{ app_root_dir }}"
+
+- name: Include API node vars
+  include_vars: api.yml
+  when: node_type == "api"
+
+- name: Include API node tasks
+  import_tasks: api.yml
+  when: node_type == "api"
+
+- name: Include worker node vars
+  include_vars: worker.yml
+  when: node_type == "worker"
+
+- name: Include worker node tasks
+  import_tasks: worker.yml
+  when: node_type == "worker"
+
+- name: Include controller node vars
+  include_vars: controller.yml
+  when: node_type == "controller"
+
+- name: Include controller node tasks
+  import_tasks: controller.yml
+  when: node_type == "controller"

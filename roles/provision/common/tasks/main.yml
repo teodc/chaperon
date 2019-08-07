@@ -1,0 +1,74 @@
+---
+- name: Refresh system packages
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Update system packages
+  apt:
+    upgrade: dist
+    force_apt_get: yes
+
+- name: Set server timezone
+  timezone:
+    name: "{{ server_timezone }}"
+
+- name: Set server locale 1/3
+  locale_gen:
+    name: "{{ server_locale }}"
+    state: present
+
+- name: Set server locale 2/3
+  shell: "update-locale {{ item }}={{ server_locale }}"
+  with_items:
+    - "LANG"
+    - "LANGUAGE"
+    - "LC_CTYPE"
+    - "LC_NUMERIC"
+    - "LC_TIME"
+    - "LC_COLLATE"
+    - "LC_MONETARY"
+    - "LC_MESSAGES"
+    - "LC_PAPER"
+    - "LC_NAME"
+    - "LC_ADDRESS"
+    - "LC_TELEPHONE"
+    - "LC_MEASUREMENT"
+    - "LC_IDENTIFICATION"
+    - "LC_ALL"
+
+- name: Set server locale 3/3
+  shell: dpkg-reconfigure -f noninteractive locales
+
+- name: Install required & usefull packages
+  apt:
+    name: "{{ common_packages }}"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Set the CRON job result MAILTO
+  cronvar:
+    user: "{{ server_user }}"
+    name: MAILTO
+    value: "\"\""
+    state: present
+
+- name: Copy SSH private key
+  copy:
+    src: "{{ files_dir }}/id_rsa"
+    dest: "/home/{{ server_user }}/.ssh/id_rsa"
+    owner: "{{ server_user }}"
+    group: "{{ server_user_group }}"
+    mode: 0600
+
+- name: Copy SSH public key
+  copy:
+    src: "{{ files_dir }}/id_rsa.pub"
+    dest: "/home/{{ server_user }}/.ssh/id_rsa.pub"
+    owner: "{{ server_user }}"
+    group: "{{ server_user_group }}"
+    mode: 0644
+
+#- name: Generate a stronger DHE parameter
+#  command: openssl dhparam 4096 -out /etc/ssl/dhparam.pem

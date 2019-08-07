@@ -1,0 +1,32 @@
+---
+- name: Enable the cron job for the Acme scheduler (controller nodes only)
+  become: true
+  cron:
+    name: "Acme Scheduled Commands"
+    user: "{{ server_user }}"
+    job: "/usr/bin/php {{ app_root_dir }}/artisan schedule:run >> /dev/null 2>&1"
+    minute: "*"
+    hour: "*"
+    day: "*"
+    month: "*"
+    weekday: "*"
+    state: present
+    backup: yes
+
+- name: Restart Cron (controller nodes only)
+  become: true
+  service:
+    name: cron
+    state: restarted
+
+- name: Ensure Nginx is not running (controller nodes only)
+  become: true
+  service:
+    name: nginx
+    state: stopped
+
+- name: Ensure PHP-FPM is not running (controller nodes only)
+  become: true
+  service:
+    name: php{{ php_version }}-fpm
+    state: stopped

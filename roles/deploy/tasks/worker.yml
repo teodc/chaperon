@@ -1,0 +1,33 @@
+---
+- name: Write queue worker configuration file (worker nodes only)
+  become: true
+  template:
+    src: "queue-worker.{{ app.environment }}.conf.j2"
+    dest: /etc/supervisor/conf.d/acme-queue-worker.conf
+    owner: "{{ server_user }}"
+    group: "{{ server_user_group }}"
+    mode: 0644
+
+- name: Create folder to store the queue logs (worker nodes only)
+  become: true
+  file:
+    path: "{{ supervisor_workers_logfile_dir }}"
+    state: directory
+
+- name: Restart Supervisor (worker nodes only)
+  become: true
+  service:
+    name: supervisor
+    state: restarted
+
+- name: Ensure Nginx is not running (worker nodes only)
+  become: true
+  service:
+    name: nginx
+    state: stopped
+
+- name: Ensure PHP-FPM is not running (worker nodes only)
+  become: true
+  service:
+    name: php{{ php_version }}-fpm
+    state: stopped

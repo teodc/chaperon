@@ -1,0 +1,18 @@
+---
+- hosts: backend
+  become: true
+  vars:
+    files_dir: "../files/{{ env }}"
+  vars_files:
+    - "../vars/{{ env }}/app.yml"
+    - "../vars/{{ env }}/php.yml"
+    - "../vars/{{ env }}/composer.yml"
+    - "../vars/{{ env }}/nginx.yml"
+    - "../vars/{{ env }}/supervisor.yml"
+  roles:
+    - ../roles/provision/common
+    - ../roles/provision/php
+    - ../roles/provision/composer
+    - ../roles/provision/nginx
+    - ../roles/provision/supervisor
+    - ../roles/provision/reboot

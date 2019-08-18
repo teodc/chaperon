@@ -1,6 +1,6 @@
 ## Chaperone
 
-> ⚠️ This project is still a work in progress
+> ⚠️ Work in progress
 
 Manage your Laravel app nodes with Ansible.
 
@@ -21,20 +21,27 @@ Manage your Laravel app nodes with Ansible.
 
 ## Setup
 
-> By default, Chaperone allows you to manage two environements for your nodes: `staging` and `production`
+> By default, Chaperone allows you to manage two environments for your nodes: `staging` and `production`
 
 ### App environment file
 
-Add a copy of your app's `.env` file in the `files` folder for each environment:
+Add a copy of your Laravel app's `.env` file in the `files` folder for each environment:
 
 ```
-cp path/to/my/app/.env files/<environment>/.env
+cp path/to/my/app/.env files/staging/.env
+cp path/to/my/app/.env files/production/.env
 ```
 
-Edit each copied `.env` file to match your environment configuration:
+Edit each copied `.env` file to match its environment configuration.
+
+
+### Hosts Inventory
+
+Describe your hosts inventory by copying & editing the `.dist` inventory files in the `hosts` folder:
 
 ```
-vim files/<environment>/.env
+cp hosts/staging.yml.dist hosts/staging.yml
+cp hosts/production.yml.dist hosts/production.yml
 ```
 
 ### SSH key pair
@@ -42,15 +49,16 @@ vim files/<environment>/.env
 Create a new SSH key pair for each environment in the `files` folder:
 
 ```
-ssh-keygen -t rsa -b 4096 -C "<environment>@acme.com"
+ssh-keygen -t rsa -b 4096 -C "staging@acme.com"
+ssh-keygen -t rsa -b 4096 -C "production@acme.com"
 ```
 
 Keep the default name `id_rsa` and generate it directly in `files/<environment>` of the Chaperone's folder.
 
-You should end up with two keys per environment, a public one and a private one, like the following:
+You should end up with two keys per environment, a public one and a private one:
 
-- `~/workspace/chaperone/files/staging/id_rsa`
-- `~/workspace/chaperone/files/staging/id_rsa.pub`
+- `~/workspace/chaperone/files/<environment>/id_rsa`
+- `~/workspace/chaperone/files/<environment>/id_rsa.pub`
 
 Then, go to your GitHub app repository and add the generated key as a deploy key.
 This way, your nodes will be able to checkout your project once they've been provisioned.
